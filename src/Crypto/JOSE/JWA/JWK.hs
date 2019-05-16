@@ -98,7 +98,7 @@ import Data.Aeson
 import qualified Data.ByteArray as BA
 import qualified Data.ByteString as B
 import qualified Data.HashMap.Strict as M
-import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Text as T
 import Test.QuickCheck (Arbitrary(..), arbitrarySizedNatural, elements, oneof, vectorOf)
 
@@ -177,7 +177,13 @@ instance Arbitrary RSAPrivateKeyOptionalParameters where
     <*> arbitrary
     <*> arbitrary
     <*> arbitrary
-    <*> arbitrary
+    <*> arbitraryRSAPrivateKeyOthElem
+    where
+      arbitraryRSAPrivateKeyOthElem =
+        oneof [
+            Just <$> ((:|) <$> arbitrary <*> arbitrary)
+          , pure Nothing
+          ]
 
 
 -- | RSA private key parameters

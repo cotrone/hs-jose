@@ -42,10 +42,10 @@ import Control.Lens
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as BC8
 import Data.X509
 import Network.URI (URI)
 import Test.QuickCheck
-import Test.QuickCheck.Instances ()
 
 import Crypto.Number.Basic (log2)
 import Crypto.JOSE.Types.Internal
@@ -156,7 +156,7 @@ instance ToJSON Base64Octets where
   toJSON (Base64Octets bytes) = encodeB64Url bytes
 
 instance Arbitrary Base64Octets where
-  arbitrary = Base64Octets <$> arbitrary
+  arbitrary = Base64Octets . BC8.pack <$> arbitrary
 
 
 -- | A base64url encoded SHA-1 digest.  Used for X.509 certificate

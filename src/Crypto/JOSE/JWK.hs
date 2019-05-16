@@ -235,11 +235,18 @@ instance Arbitrary JWK where
     <*> pure Nothing
     <*> pure Nothing
     <*> pure Nothing
-    <*> arbitrary
+    <*> (arbitraryMaybe arbitraryText)
     <*> pure Nothing
     <*> pure Nothing
     <*> arbitrary
     <*> arbitrary
+    where
+      arbitraryText = T.pack <$> arbitrary
+      arbitraryMaybe g =
+        oneof [
+            Just <$> g
+          , pure Nothing
+        ] 
 
 fromKeyMaterial :: KeyMaterial -> JWK
 fromKeyMaterial k = JWK k z z z z z z z z where z = Nothing

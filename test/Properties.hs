@@ -21,11 +21,11 @@ import Control.Monad.Except (runExceptT)
 
 import Data.Aeson
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as BC8
 
 import Test.Tasty
 import Test.Tasty.QuickCheck
 import Test.QuickCheck.Monadic
-import Test.QuickCheck.Instances ()
 
 import Crypto.JOSE.Error (Error(..))
 import Crypto.JOSE.Types
@@ -54,8 +54,9 @@ debugRoundTrip f = monadicIO $ do
     "JSON: \n" ++ show encoded ++ "\n\nDecoded: \n" ++ show (decode encoded :: Maybe [a])
   assert $ f a
 
-prop_rsaSignAndVerify :: B.ByteString -> Property
-prop_rsaSignAndVerify msg = monadicIO $ do
+prop_rsaSignAndVerify :: String -> Property
+prop_rsaSignAndVerify msgString = monadicIO $ do
+  let msg = BC8.pack msgString
   keylen <- pick $ elements ((`div` 8) <$> [2048, 3072, 4096])
   k :: JWK <- run $ genJWK (RSAGenParam keylen)
   alg <- pick $ elements [RS256, RS384, RS512, PS256, PS384, PS512]
@@ -63,8 +64,9 @@ prop_rsaSignAndVerify msg = monadicIO $ do
   wp (runExceptT (signJWS msg [(newJWSHeader (Protected, alg), k)]
     >>= verifyJWS defaultValidationSettings k)) (checkSignVerifyResult msg)
 
-prop_bestJWSAlg :: B.ByteString -> Property
-prop_bestJWSAlg msg = monadicIO $ do
+prop_bestJWSAlg :: String -> Property
+prop_bestJWSAlg msgString = monadicIO $ do
+  let msg = BC8.pack msgString
   genParam <- pick arbitrary
   k <- run $ genJWK genParam
   case bestJWSAlg k of
